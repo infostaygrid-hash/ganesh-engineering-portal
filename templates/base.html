@@ -2,80 +2,237 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Ganesh Engineering - Production Logger{% endblock %}</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ganesh Engineering Industries - Production & Quality Portal{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <style>
-        /* Basic styling by Tushar */
+        :root {
+            --app-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --sidebar-bg: #0f172a;
+            --sidebar-hover: #1e293b;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary-accent: #2563eb;
+            --success-accent: #16a34a;
+            --danger-accent: #dc2626;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding-bottom: 30px;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--app-bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .header-title {
-            background-color: #0b5ed7;
-            color: white;
-            padding: 15px;
-            margin-bottom: 20px;
+
+        /* Top Navigation Header */
+        .top-navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
         }
-        .nav-links a {
-            color: white;
-            margin-right: 20px;
-            text-decoration: none;
-            font-size: 15px;
-        }
-        .nav-links a:hover {
-            text-decoration: underline;
-        }
-        .nav-links a.active {
-            font-weight: bold;
-            color: #ffde59;
-        }
-        .my-box {
-            background: #ffffff;
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin-bottom: 15px;
+
+        .brand-badge {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            padding: 4px 8px;
             border-radius: 4px;
+            border: 1px solid #cbd5e1;
         }
-        table {
-            background: white;
+
+        .nav-pill-link {
+            color: #475569;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0.45rem 0.9rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
         }
-        th {
-            background-color: #e9ecef !important;
-            font-size: 13px;
+
+        .nav-pill-link:hover {
+            color: var(--primary-accent);
+            background-color: #f1f5f9;
         }
-        td {
-            font-size: 13px;
+
+        .nav-pill-link.active {
+            color: var(--primary-accent);
+            background-color: #eff6ff;
+            font-weight: 600;
+        }
+
+        /* Standard Cards */
+        .app-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-card {
+            padding: 1.25rem;
+            border-radius: 10px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+        }
+
+        .stat-val {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1;
+            margin: 0;
+        }
+
+        /* Clean Table */
+        .table-app {
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        .table-app thead th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            white-space: nowrap;
+        }
+
+        .table-app tbody td {
+            padding: 0.85rem 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+        }
+
+        .part-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .badge-shift {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        .badge-machine {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 3px 7px;
+            border-radius: 4px;
+            background-color: #e0e7ff;
+            color: #3730a3;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 0;
+            font-size: 0.82rem;
+            color: var(--text-muted);
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Header -->
-    <div class="header-title shadow-sm">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="m-0">GANESH ENGINEERING INDUSTRIES</h4>
-                <small style="font-size: 12px; color: #e0e0e0;">Plant Shift Logging Portal (Rohtak Unit) | Training Project</small>
+    <!-- Main Navigation Bar -->
+    <header class="top-navbar sticky-top">
+        <div class="container-fluid px-lg-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <!-- Company & System Identity -->
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div style="width: 34px; height: 34px; background: #0f172a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+                        <i class="bi bi-cpu-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold" style="font-size: 0.95rem; line-height: 1.2;">GANESH ENGINEERING INDUSTRIES</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Manufacturing & Precision Machining Unit &bull; Rohtak</div>
+                    </div>
+                </div>
+                <span class="brand-badge d-none d-sm-inline-block">IATF 16949:2016</span>
             </div>
-            <div class="nav-links">
-                <a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">Home / Records</a>
-                <a href="{{ url_for('add_log') }}" class="{% if request.endpoint == 'add_log' %}active{% endif %}">+ New Shift Entry</a>
-                <a href="{{ url_for('components') }}" class="{% if request.endpoint == 'components' %}active{% endif %}">Parts Master</a>
-                <span style="font-size: 12px; background: #003b95; padding: 4px 8px; border-radius: 3px;">Tushar (Roll No: CSE-5th)</span>
+
+            <!-- Navigation Links -->
+            <nav class="d-flex align-items-center gap-1">
+                <a href="{{ url_for('index') }}" class="nav-pill-link {% if request.endpoint == 'index' %}active{% endif %}">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Production Logs</span>
+                </a>
+                <a href="{{ url_for('add_log') }}" class="nav-pill-link {% if request.endpoint == 'add_log' %}active{% endif %}">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Add Shift Entry</span>
+                </a>
+                <a href="{{ url_for('components') }}" class="nav-pill-link {% if request.endpoint == 'components' %}active{% endif %}">
+                    <i class="bi bi-boxes"></i>
+                    <span>Parts Master</span>
+                </a>
+            </nav>
+
+            <!-- Student / Evaluation Info Pill -->
+            <div class="d-none d-md-flex align-items-center gap-2 border-start ps-3">
+                <div class="text-end" style="line-height: 1.2;">
+                    <div class="fw-bold" style="font-size: 0.85rem;">Tushar</div>
+                    <div style="font-size: 0.72rem; color: #64748b;">Trainee &bull; B.Tech CSE</div>
+                </div>
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.82rem; color: #334155;">
+                    T
+                </div>
             </div>
         </div>
-    </div>
+    </header>
 
-    <div class="container">
-        <!-- Flash messages -->
+    <!-- Page Body -->
+    <main class="container-fluid px-lg-4 py-4">
+        <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
@@ -83,10 +240,22 @@
         {% endwith %}
 
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Professional Footer -->
+    <footer>
+        <div class="container-fluid px-lg-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <strong>Ganesh Engineering Industries</strong> &bull; Industrial Training Project (July 2026)
+            </div>
+            <div>
+                Student: <strong>Tushar</strong> &bull; Under Supervision of: <strong>Mr. Manish Saini</strong> (IT & Systems Lead)
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

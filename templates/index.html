@@ -1,104 +1,140 @@
 {% extends 'base.html' %}
 
-{% block title %}Shift Records - Ganesh Engineering{% endblock %}
+{% block title %}Production Dashboard - Ganesh Engineering Industries{% endblock %}
 
 {% block content %}
-<div class="row align-items-center mb-3">
-    <div class="col-md-6">
-        <h5 class="m-0">Daily Shift Production & Rejection Sheet</h5>
-        <small class="text-muted">Database logs for CNC & VMC Machine Cells (July 2026)</small>
+<!-- Metrics Cards Row -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="stat-label">Total Machined</span>
+                <span class="text-primary"><i class="bi bi-gear-wide fs-5"></i></span>
+            </div>
+            <p class="stat-val text-primary">{{ total_prod }} <span style="font-size: 0.9rem; font-weight: 500; color: #64748b;">pcs</span></p>
+            <div style="font-size: 0.75rem; color: #64748b;">Gross production for July 2026</div>
+        </div>
     </div>
-    <div class="col-md-6 text-end">
-        <a href="{{ url_for('export_csv') }}" class="btn btn-outline-success btn-sm">Export to Excel / CSV</a>
-        <a href="{{ url_for('add_log') }}" class="btn btn-primary btn-sm ms-2">+ Add Shift Entry</a>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="stat-label">Accepted / QA OK</span>
+                <span class="text-success"><i class="bi bi-patch-check fs-5"></i></span>
+            </div>
+            <p class="stat-val text-success">{{ total_accepted }} <span style="font-size: 0.9rem; font-weight: 500; color: #64748b;">pcs</span></p>
+            <div style="font-size: 0.75rem; color: #64748b;">Passed dimensional inspection</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="stat-label">Scrap / Rejection</span>
+                <span class="text-danger"><i class="bi bi-x-octagon fs-5"></i></span>
+            </div>
+            <p class="stat-val text-danger">{{ total_rejected }} <span style="font-size: 0.9rem; font-weight: 500; color: #64748b;">pcs</span></p>
+            <div style="font-size: 0.75rem; color: #64748b;">Defect logs & scrap inventory</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="stat-label">Rejection Rate</span>
+                <span class="text-secondary"><i class="bi bi-pie-chart fs-5"></i></span>
+            </div>
+            <p class="stat-val text-dark">{{ rejection_rate }}%</p>
+            <div style="font-size: 0.75rem; color: #16a34a;"><i class="bi bi-check-circle me-1"></i>Within IATF &lt; 3.0% threshold</div>
+        </div>
     </div>
 </div>
 
-<!-- Summary Boxes -->
-<div class="row g-2 mb-3">
-    <div class="col-md-3">
-        <div class="my-box text-center py-2">
-            <span class="text-muted" style="font-size: 12px;">TOTAL PRODUCED</span>
-            <h5 class="text-primary m-0 fw-bold">{{ total_prod }} pcs</h5>
+<!-- Main Table Container -->
+<div class="app-card">
+    <!-- Header with controls -->
+    <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h5 class="fw-bold mb-1" style="font-size: 1.05rem;">Machine Cell Shift Production Records</h5>
+            <p class="text-muted small mb-0">Logs synchronized across CNC Turning, VMC Milling, and Cylindrical Grinding cells</p>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <!-- Search Filter Bar -->
+            <div class="input-group input-group-sm" style="min-width: 260px;">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" id="filterInput" class="form-control border-start-0" placeholder="Filter by part, machine, operator..." onkeyup="filterTable()">
+            </div>
+            <a href="{{ url_for('export_csv') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                <i class="bi bi-download"></i>
+                <span>Export CSV</span>
+            </a>
+            <a href="{{ url_for('add_log') }}" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
+                <i class="bi bi-plus-lg"></i>
+                <span>Add Entry</span>
+            </a>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="my-box text-center py-2">
-            <span class="text-muted" style="font-size: 12px;">ACCEPTED / OK</span>
-            <h5 class="text-success m-0 fw-bold">{{ total_accepted }} pcs</h5>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="my-box text-center py-2">
-            <span class="text-muted" style="font-size: 12px;">REJECTED / SCRAP</span>
-            <h5 class="text-danger m-0 fw-bold">{{ total_rejected }} pcs</h5>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="my-box text-center py-2">
-            <span class="text-muted" style="font-size: 12px;">REJECTION PERCENTAGE</span>
-            <h5 class="text-dark m-0 fw-bold">{{ rejection_rate }}%</h5>
-        </div>
-    </div>
-</div>
 
-<!-- Search filter bar (Classic student JavaScript feature) -->
-<div class="mb-2">
-    <input type="text" id="filterInput" class="form-control form-control-sm" placeholder="Type here to search by Part Name, Machine, or Operator..." onkeyup="filterTable()">
-</div>
-
-<!-- Main Table -->
-<div class="table-responsive">
-    <table class="table table-bordered table-hover" id="productionTable">
-        <thead>
-            <tr>
-                <th width="50">ID</th>
-                <th>Date</th>
-                <th>Shift</th>
-                <th>Part No.</th>
-                <th>Part Name</th>
-                <th>Machine</th>
-                <th>Operator</th>
-                <th>Total</th>
-                <th>OK Qty</th>
-                <th>Rej Qty</th>
-                <th>Reason for Rejection</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in logs %}
-            <tr>
-                <td>{{ log.id }}</td>
-                <td>{{ log.log_date }}</td>
-                <td>{{ log.shift }}</td>
-                <td><code>{{ log.part_number }}</code></td>
-                <td>{{ log.part_name }}</td>
-                <td>{{ log.machine_id }}</td>
-                <td>{{ log.operator_name }}</td>
-                <td><strong>{{ log.total_produced }}</strong></td>
-                <td class="text-success fw-bold">{{ log.accepted_qty }}</td>
-                <td class="text-danger fw-bold">{{ log.rejected_qty }}</td>
-                <td>
-                    {% if log.rejected_qty > 0 %}
-                        <span class="text-danger">{{ log.rejection_reason }}</span>
-                    {% else %}
-                        <span class="text-muted">None (OK)</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="11" class="text-center py-3 text-muted">No records in database.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-hover table-app" id="productionTable">
+            <thead>
+                <tr>
+                    <th style="width: 60px;">#ID</th>
+                    <th>Date</th>
+                    <th>Shift</th>
+                    <th>Component & Drawing</th>
+                    <th>Machine Cell</th>
+                    <th>Operator</th>
+                    <th class="text-end">Total</th>
+                    <th class="text-end">Accepted</th>
+                    <th class="text-end">Rejected</th>
+                    <th>Defect / QA Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td class="text-muted fw-semibold">#{{ log.id }}</td>
+                    <td class="text-nowrap" style="font-weight: 500;">{{ log.log_date }}</td>
+                    <td><span class="badge-shift">{{ log.shift }}</span></td>
+                    <td>
+                        <div class="fw-semibold">{{ log.part_name }}</div>
+                        <span class="part-code">{{ log.part_number }}</span>
+                    </td>
+                    <td><span class="badge-machine">{{ log.machine_id }}</span></td>
+                    <td>{{ log.operator_name }}</td>
+                    <td class="text-end fw-bold">{{ log.total_produced }}</td>
+                    <td class="text-end text-success fw-bold">{{ log.accepted_qty }}</td>
+                    <td class="text-end fw-bold">
+                        {% if log.rejected_qty > 0 %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">{{ log.rejected_qty }}</span>
+                        {% else %}
+                            <span class="text-muted">0</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if log.rejected_qty > 0 %}
+                            <span class="text-danger small d-inline-flex align-items-center gap-1">
+                                <i class="bi bi-exclamation-triangle-fill"></i>{{ log.rejection_reason }}
+                            </span>
+                        {% else %}
+                            <span class="text-success small d-inline-flex align-items-center gap-1">
+                                <i class="bi bi-check-circle"></i>100% OK
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="10" class="text-center py-4 text-muted">No production logs found. Click "Add Entry" to create a new shift record.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-// Simple search function created for filtering table
 function filterTable() {
     var input = document.getElementById("filterInput");
     var filter = input.value.toLowerCase();
