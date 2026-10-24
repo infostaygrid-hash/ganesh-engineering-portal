@@ -1,128 +1,95 @@
 {% extends 'base.html' %}
 
-{% block title %}Machining Logs & Shift Summary - Ganesh Engineering{% endblock %}
+{% block title %}Home - Daily Shift Logs{% endblock %}
 
 {% block content %}
-<!-- Page Header -->
-<div class="d-flex justify-content-between align-items-end mb-4">
-    <div>
-        <h3 class="fw-bold mb-1" style="color: #0f172a; letter-spacing: -0.02em;">Shopfloor Production Dashboard</h3>
-        <p class="text-muted mb-0 small">Monitoring daily CNC turning and VMC output across Rohtak machining cells</p>
-    </div>
-    <div class="d-flex gap-2">
-        <a href="{{ url_for('export_csv') }}" class="btn btn-outline-secondary btn-sm bg-white">
-            <i class="bi bi-file-earmark-spreadsheet me-1"></i>Download CSV
-        </a>
-    </div>
-</div>
-
-<!-- Stat Grid -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="glass-card p-3" style="border-left: 4px solid #2563eb;">
-            <div class="d-flex justify-content-between text-muted small fw-semibold text-uppercase">
-                <span>Total Output</span>
-                <i class="bi bi-gear-fill text-primary"></i>
-            </div>
-            <h3 class="fw-bold my-1" style="color: #0f172a;">{{ total_prod }}</h3>
-            <small class="text-muted">Total components turned</small>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="glass-card p-3" style="border-left: 4px solid #16a34a;">
-            <div class="d-flex justify-content-between text-muted small fw-semibold text-uppercase">
-                <span>Accepted / OK</span>
-                <i class="bi bi-patch-check-fill text-success"></i>
-            </div>
-            <h3 class="fw-bold my-1 text-success">{{ total_accepted }}</h3>
-            <small class="text-success">Passed QA specifications</small>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="glass-card p-3" style="border-left: 4px solid #dc2626;">
-            <div class="d-flex justify-content-between text-muted small fw-semibold text-uppercase">
-                <span>Scrap / Rejects</span>
-                <i class="bi bi-exclamation-triangle-fill text-danger"></i>
-            </div>
-            <h3 class="fw-bold my-1 text-danger">{{ total_rejected }}</h3>
-            <small class="text-danger">Defect loss to raw billets</small>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="glass-card p-3" style="border-left: 4px solid #0f172a;">
-            <div class="d-flex justify-content-between text-muted small fw-semibold text-uppercase">
-                <span>Scrap Ratio</span>
-                <i class="bi bi-percent text-dark"></i>
-            </div>
-            <h3 class="fw-bold my-1" style="color: #0f172a;">{{ rejection_rate }}%</h3>
-            <small class="text-success">&bull; Compliant with &lt; 3.0% SLA</small>
-        </div>
-    </div>
-</div>
-
-<!-- Table Card -->
-<div class="glass-card">
-    <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3 bg-white">
+<div class="content-box">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
         <div>
-            <h6 class="fw-bold m-0" style="color: #0f172a;">Shift Production Register (July 2026)</h6>
+            <h4 class="mb-1 text-primary fw-bold">Daily Production & Machine Shift Register</h4>
+            <p class="text-muted small mb-0">Record of machined components, CNC/VMC cells, and quality rejection reasons (July 2026)</p>
         </div>
-        <div style="min-width: 280px;">
-            <input type="text" id="filterInput" class="form-control form-control-sm" placeholder="Search by operator, machine, part..." onkeyup="filterTable()">
+        <div>
+            <a href="{{ url_for('add_log') }}" class="btn btn-success btn-sm">+ Add Shift Entry</a>
+            <a href="{{ url_for('export_csv') }}" class="btn btn-outline-secondary btn-sm ms-1">Export to CSV</a>
         </div>
     </div>
 
+    <!-- 4 Summary Boxes -->
+    <div class="row g-2 mb-3">
+        <div class="col-md-3">
+            <div class="summary-box">
+                <small class="text-muted text-uppercase fw-bold">Total Produced</small>
+                <h4 class="text-primary">{{ total_prod }} pcs</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-box">
+                <small class="text-muted text-uppercase fw-bold">Accepted (OK)</small>
+                <h4 class="text-success">{{ total_accepted }} pcs</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-box">
+                <small class="text-muted text-uppercase fw-bold">Rejected (Scrap)</small>
+                <h4 class="text-danger">{{ total_rejected }} pcs</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-box">
+                <small class="text-muted text-uppercase fw-bold">Rejection Rate</small>
+                <h4 class="text-dark">{{ rejection_rate }}%</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search by operator name, machine, part number..." onkeyup="searchLogs()">
+    </div>
+
+    <!-- Production Table -->
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" id="productionTable" style="font-size: 14px;">
-            <thead style="background: #f8fafc; font-size: 12px; text-transform: uppercase; color: #64748b;">
+        <table class="table table-bordered table-striped table-hover mb-0" id="logsTable">
+            <thead>
                 <tr>
-                    <th class="ps-3 py-3">#ID</th>
+                    <th width="40">ID</th>
                     <th>Date</th>
                     <th>Shift</th>
-                    <th>Component & Drawing</th>
-                    <th>Cell</th>
+                    <th>Part Number</th>
+                    <th>Component Name</th>
+                    <th>Machine</th>
                     <th>Operator</th>
-                    <th class="text-end">Total</th>
-                    <th class="text-end text-success">OK</th>
-                    <th class="text-end text-danger">Rej</th>
-                    <th>Defect / QA Status</th>
+                    <th>Total</th>
+                    <th class="text-success">OK</th>
+                    <th class="text-danger">Rej</th>
+                    <th>Rejection Reason</th>
                 </tr>
             </thead>
             <tbody>
                 {% for log in logs %}
                 <tr>
-                    <td class="ps-3 text-muted fw-semibold">#{{ log.id }}</td>
-                    <td class="text-nowrap">{{ log.log_date }}</td>
-                    <td><span class="badge bg-light text-dark border">{{ log.shift }}</span></td>
-                    <td>
-                        <div class="fw-bold text-dark">{{ log.part_name }}</div>
-                        <span class="mono-code text-primary">{{ log.part_number }}</span>
-                    </td>
-                    <td><span class="badge bg-secondary font-monospace">{{ log.machine_id }}</span></td>
+                    <td>{{ log.id }}</td>
+                    <td>{{ log.log_date }}</td>
+                    <td>{{ log.shift }}</td>
+                    <td><strong>{{ log.part_number }}</strong></td>
+                    <td>{{ log.part_name }}</td>
+                    <td>{{ log.machine_id }}</td>
                     <td>{{ log.operator_name }}</td>
-                    <td class="text-end fw-bold">{{ log.total_produced }}</td>
-                    <td class="text-end fw-bold text-success">{{ log.accepted_qty }}</td>
-                    <td class="text-end fw-bold text-danger">
-                        {% if log.rejected_qty > 0 %}
-                            <span class="badge bg-danger">{{ log.rejected_qty }}</span>
-                        {% else %}
-                            <span class="text-muted">0</span>
-                        {% endif %}
-                    </td>
+                    <td><strong>{{ log.total_produced }}</strong></td>
+                    <td class="text-success fw-bold">{{ log.accepted_qty }}</td>
+                    <td class="text-danger fw-bold">{{ log.rejected_qty }}</td>
                     <td>
                         {% if log.rejected_qty > 0 %}
-                            <span class="text-danger small fw-semibold">
-                                <i class="bi bi-x-circle me-1"></i>{{ log.rejection_reason }}
-                            </span>
+                            <span class="text-danger">{{ log.rejection_reason }}</span>
                         {% else %}
-                            <span class="text-success small fw-semibold">
-                                <i class="bi bi-check2-circle me-1"></i>Approved (100% OK)
-                            </span>
+                            <span class="text-muted">None (100% OK)</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="10" class="text-center py-4 text-muted">No records found.</td>
+                    <td colspan="11" class="text-center py-3">No logs available in database.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -133,15 +100,16 @@
 
 {% block scripts %}
 <script>
-function filterTable() {
-    var input = document.getElementById("filterInput");
+// Search filter implementation
+function searchLogs() {
+    var input = document.getElementById("searchInput");
     var filter = input.value.toLowerCase();
-    var table = document.getElementById("productionTable");
+    var table = document.getElementById("logsTable");
     var tr = table.getElementsByTagName("tr");
 
     for (var i = 1; i < tr.length; i++) {
-        var rowText = tr[i].textContent || tr[i].innerText;
-        if (rowText.toLowerCase().indexOf(filter) > -1) {
+        var text = tr[i].textContent || tr[i].innerText;
+        if (text.toLowerCase().indexOf(filter) > -1) {
             tr[i].style.display = "";
         } else {
             tr[i].style.display = "none";

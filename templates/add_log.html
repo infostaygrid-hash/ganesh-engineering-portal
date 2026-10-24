@@ -1,98 +1,86 @@
 {% extends 'base.html' %}
 
-{% block title %}Record Production Entry - Ganesh Engineering{% endblock %}
+{% block title %}Add Shift Production Record{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="glass-card">
-            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
-                <div>
-                    <h5 class="fw-bold mb-0">Record Machine Cell Production</h5>
-                    <small class="text-muted">Direct log synchronization with SQLite database</small>
+    <div class="col-md-8">
+        <div class="content-box">
+            <h5 class="text-primary fw-bold border-bottom pb-2 mb-3">Add Shift Production Record</h5>
+            
+            <form method="POST" action="{{ url_for('add_log') }}">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">Production Date:</label>
+                        <input type="date" name="log_date" class="form-control form-control-sm" value="2026-07-31" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">Shift Name:</label>
+                        <select name="shift" class="form-select form-select-sm" required>
+                            <option value="Shift A (06:00 - 14:00)">Shift A (06:00 - 14:00)</option>
+                            <option value="Shift B (14:00 - 22:00)">Shift B (14:00 - 22:00)</option>
+                            <option value="Shift C (22:00 - 06:00)">Shift C (22:00 - 06:00)</option>
+                        </select>
+                    </div>
                 </div>
-                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-x-lg me-1"></i>Cancel
-                </a>
-            </div>
 
-            <div class="p-4 bg-white">
-                <form method="POST" action="{{ url_for('add_log') }}">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold small">Date</label>
-                            <input type="date" name="log_date" class="form-control" value="2026-07-31" required>
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Select Component / Part:</label>
+                    <select name="part_id" class="form-select form-select-sm" required>
+                        {% for comp in components %}
+                            <option value="{{ comp.id }}">{{ comp.part_name }} ({{ comp.part_number }}) - Material: {{ comp.material_grade }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">Machine Code:</label>
+                        <select name="machine_id" class="form-select form-select-sm" required>
+                            {% for m in machines %}
+                                <option value="{{ m.machine_code }}">{{ m.machine_code }} ({{ m.machine_name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">Operator Name:</label>
+                        <input type="text" name="operator_name" class="form-control form-control-sm" placeholder="e.g. Ramesh Kumar" required>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light border rounded mb-3">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label fw-bold small">Total Machined:</label>
+                            <input type="number" id="total_produced" name="total_produced" class="form-control form-control-sm" placeholder="e.g. 150" oninput="calculateDifference()" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold small">Shift Window</label>
-                            <select name="shift" class="form-select" required>
-                                <option value="Shift A (06:00 - 14:00)">Shift A (06:00 - 14:00)</option>
-                                <option value="Shift B (14:00 - 22:00)">Shift B (14:00 - 22:00)</option>
-                                <option value="Shift C (22:00 - 06:00)">Shift C (22:00 - 06:00)</option>
-                            </select>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label fw-bold small text-success">Accepted (OK):</label>
+                            <input type="number" id="accepted_qty" name="accepted_qty" class="form-control form-control-sm" placeholder="e.g. 147" oninput="calculateDifference()" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold small">Shift Operator</label>
-                            <input type="text" name="operator_name" class="form-control" placeholder="e.g. Ramesh Kumar" required>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label fw-bold small text-danger">Rejected Qty:</label>
+                            <input type="number" id="rejected_qty" name="rejected_qty" class="form-control form-control-sm" placeholder="0" required>
                         </div>
                     </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-7">
-                            <label class="form-label fw-semibold small">Component Drawing</label>
-                            <select name="part_id" class="form-select" required>
-                                {% for comp in components %}
-                                    <option value="{{ comp.id }}">{{ comp.part_name }} ({{ comp.part_number }}) - {{ comp.material_grade }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label fw-semibold small">Machining Cell (Machine ID)</label>
-                            <select name="machine_id" class="form-select" required>
-                                {% for m in machines %}
-                                    <option value="{{ m.machine_code }}">{{ m.machine_code }} - {{ m.machine_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                    <div class="mt-2">
+                        <label class="form-label fw-bold small">Rejection Reason (if rejected &gt; 0):</label>
+                        <select name="rejection_reason" class="form-select form-select-sm">
+                            <option value="None (100% OK)">None (100% OK)</option>
+                            <option value="Dimensional Runout Error (+0.08mm)">Dimensional Runout Error (+0.08mm)</option>
+                            <option value="Surface Porosity / Blowhole (Forging Defect)">Surface Porosity / Blowhole (Forging Defect)</option>
+                            <option value="Thread Pitch Mismatch">Thread Pitch Mismatch</option>
+                            <option value="Tool Chatter Marks (VMC Finish)">Tool Chatter Marks (VMC Finish)</option>
+                            <option value="Step Diameter Undercut">Step Diameter Undercut</option>
+                        </select>
                     </div>
+                </div>
 
-                    <div class="p-3 bg-light rounded-3 border mb-4">
-                        <h6 class="fw-bold mb-3 small text-uppercase text-muted">Piece Count & Quality Inspection</h6>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold small">Total Turned</label>
-                                <input type="number" id="total_produced" name="total_produced" class="form-control fw-bold" placeholder="e.g. 150" oninput="autoCalculate()" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold small text-success">Passed (OK Qty)</label>
-                                <input type="number" id="accepted_qty" name="accepted_qty" class="form-control fw-bold text-success" placeholder="e.g. 147" oninput="autoCalculate()" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold small text-danger">Scrapped (Rejects)</label>
-                                <input type="number" id="rejected_qty" name="rejected_qty" class="form-control fw-bold text-danger" placeholder="0" required>
-                            </div>
-                            <div class="col-12 mt-2">
-                                <label class="form-label fw-semibold small">Rejection Taxonomy / Reason</label>
-                                <select name="rejection_reason" class="form-select">
-                                    <option value="None (100% OK)">None (100% OK Batch)</option>
-                                    <option value="Dimensional Runout Error (+0.08mm)">Dimensional Runout Error (+0.08mm)</option>
-                                    <option value="Surface Porosity / Blowhole (Forging Defect)">Surface Porosity / Blowhole (Forging Defect)</option>
-                                    <option value="Thread Pitch Mismatch">Thread Pitch Mismatch</option>
-                                    <option value="Tool Chatter Marks (VMC Finish)">Tool Chatter Marks (VMC Finish)</option>
-                                    <option value="Step Diameter Undercut">Step Diameter Undercut</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary px-3">Cancel</a>
-                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
-                            <i class="bi bi-check-lg me-1"></i>Save Shift Record
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-sm px-4">Submit Entry</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -100,11 +88,11 @@
 
 {% block scripts %}
 <script>
-function autoCalculate() {
-    var total = parseInt(document.getElementById("total_produced").value) || 0;
-    var accepted = parseInt(document.getElementById("accepted_qty").value) || 0;
-    if (total > 0 && accepted >= 0 && accepted <= total) {
-        document.getElementById("rejected_qty").value = total - accepted;
+function calculateDifference() {
+    var tot = parseInt(document.getElementById("total_produced").value) || 0;
+    var acc = parseInt(document.getElementById("accepted_qty").value) || 0;
+    if (tot > 0 && acc >= 0 && acc <= tot) {
+        document.getElementById("rejected_qty").value = tot - acc;
     }
 }
 </script>
