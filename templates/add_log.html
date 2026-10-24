@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Shift Entry{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="my-box">
+            <h5 class="border-bottom pb-2 mb-3">Add Shift Production Record</h5>
+            
+            <form method="POST" action="{{ url_for('add_log') }}">
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size: 13px;">Date:</label>
+                        <input type="date" name="log_date" class="form-control form-control-sm" value="2026-07-31" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size: 13px;">Shift:</label>
+                        <select name="shift" class="form-select form-select-sm" required>
+                            <option value="Shift A (06:00 - 14:00)">Shift A (06:00 - 14:00)</option>
+                            <option value="Shift B (14:00 - 22:00)">Shift B (14:00 - 22:00)</option>
+                            <option value="Shift C (22:00 - 06:00)">Shift C (22:00 - 06:00)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label" style="font-size: 13px;">Component / Part:</label>
+                    <select name="part_id" class="form-select form-select-sm" required>
+                        {% for comp in components %}
+                            <option value="{{ comp.id }}">{{ comp.part_name }} [{{ comp.part_number }}] - Grade: {{ comp.material_grade }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size: 13px;">Machine No / Cell:</label>
+                        <select name="machine_id" class="form-select form-select-sm" required>
+                            {% for m in machines %}
+                                <option value="{{ m.machine_code }}">{{ m.machine_code }} ({{ m.machine_name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size: 13px;">Operator Name:</label>
+                        <input type="text" name="operator_name" class="form-control form-control-sm" placeholder="e.g. Ramesh Kumar" required>
+                    </div>
+                </div>
+
+                <hr class="my-3">
+
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label class="form-label" style="font-size: 13px;">Total Produced:</label>
+                        <input type="number" id="total_produced" name="total_produced" class="form-control form-control-sm" placeholder="e.g. 150" oninput="autoCalculate()" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-success" style="font-size: 13px;">Accepted (OK):</label>
+                        <input type="number" id="accepted_qty" name="accepted_qty" class="form-control form-control-sm" placeholder="e.g. 147" oninput="autoCalculate()" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-danger" style="font-size: 13px;">Rejected Qty:</label>
+                        <input type="number" id="rejected_qty" name="rejected_qty" class="form-control form-control-sm" placeholder="0" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 13px;">Reason for Rejection (if any):</label>
+                    <select name="rejection_reason" class="form-select form-select-sm">
+                        <option value="None (100% OK)">None (100% OK)</option>
+                        <option value="Dimensional Runout Error (+0.08mm)">Dimensional Runout Error (+0.08mm)</option>
+                        <option value="Surface Porosity / Blowhole (Forging Defect)">Surface Porosity / Blowhole (Forging Defect)</option>
+                        <option value="Thread Pitch Mismatch">Thread Pitch Mismatch</option>
+                        <option value="Tool Chatter Marks (VMC Finish)">Tool Chatter Marks (VMC Finish)</option>
+                        <option value="Step Diameter Undercut">Step Diameter Undercut</option>
+                    </select>
+                    <small class="text-muted" style="font-size: 11px;">Leave as "None" if all parts are OK.</small>
+                </div>
+
+                <div class="d-flex justify-content-between pt-2">
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-sm px-4">Submit Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto calculate rejected quantity from total and accepted
+function autoCalculate() {
+    var total = parseInt(document.getElementById("total_produced").value) || 0;
+    var accepted = parseInt(document.getElementById("accepted_qty").value) || 0;
+    if (total > 0 && accepted >= 0 && accepted <= total) {
+        document.getElementById("rejected_qty").value = total - accepted;
+    }
+}
+</script>
+{% endblock %}

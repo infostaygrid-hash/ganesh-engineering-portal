@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Shift Records - Ganesh Engineering{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-3">
+    <div class="col-md-6">
+        <h5 class="m-0">Daily Shift Production & Rejection Sheet</h5>
+        <small class="text-muted">Database logs for CNC & VMC Machine Cells (July 2026)</small>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="{{ url_for('export_csv') }}" class="btn btn-outline-success btn-sm">Export to Excel / CSV</a>
+        <a href="{{ url_for('add_log') }}" class="btn btn-primary btn-sm ms-2">+ Add Shift Entry</a>
+    </div>
+</div>
+
+<!-- Summary Boxes -->
+<div class="row g-2 mb-3">
+    <div class="col-md-3">
+        <div class="my-box text-center py-2">
+            <span class="text-muted" style="font-size: 12px;">TOTAL PRODUCED</span>
+            <h5 class="text-primary m-0 fw-bold">{{ total_prod }} pcs</h5>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="my-box text-center py-2">
+            <span class="text-muted" style="font-size: 12px;">ACCEPTED / OK</span>
+            <h5 class="text-success m-0 fw-bold">{{ total_accepted }} pcs</h5>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="my-box text-center py-2">
+            <span class="text-muted" style="font-size: 12px;">REJECTED / SCRAP</span>
+            <h5 class="text-danger m-0 fw-bold">{{ total_rejected }} pcs</h5>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="my-box text-center py-2">
+            <span class="text-muted" style="font-size: 12px;">REJECTION PERCENTAGE</span>
+            <h5 class="text-dark m-0 fw-bold">{{ rejection_rate }}%</h5>
+        </div>
+    </div>
+</div>
+
+<!-- Search filter bar (Classic student JavaScript feature) -->
+<div class="mb-2">
+    <input type="text" id="filterInput" class="form-control form-control-sm" placeholder="Type here to search by Part Name, Machine, or Operator..." onkeyup="filterTable()">
+</div>
+
+<!-- Main Table -->
+<div class="table-responsive">
+    <table class="table table-bordered table-hover" id="productionTable">
+        <thead>
+            <tr>
+                <th width="50">ID</th>
+                <th>Date</th>
+                <th>Shift</th>
+                <th>Part No.</th>
+                <th>Part Name</th>
+                <th>Machine</th>
+                <th>Operator</th>
+                <th>Total</th>
+                <th>OK Qty</th>
+                <th>Rej Qty</th>
+                <th>Reason for Rejection</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.id }}</td>
+                <td>{{ log.log_date }}</td>
+                <td>{{ log.shift }}</td>
+                <td><code>{{ log.part_number }}</code></td>
+                <td>{{ log.part_name }}</td>
+                <td>{{ log.machine_id }}</td>
+                <td>{{ log.operator_name }}</td>
+                <td><strong>{{ log.total_produced }}</strong></td>
+                <td class="text-success fw-bold">{{ log.accepted_qty }}</td>
+                <td class="text-danger fw-bold">{{ log.rejected_qty }}</td>
+                <td>
+                    {% if log.rejected_qty > 0 %}
+                        <span class="text-danger">{{ log.rejection_reason }}</span>
+                    {% else %}
+                        <span class="text-muted">None (OK)</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="11" class="text-center py-3 text-muted">No records in database.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Simple search function created for filtering table
+function filterTable() {
+    var input = document.getElementById("filterInput");
+    var filter = input.value.toLowerCase();
+    var table = document.getElementById("productionTable");
+    var tr = table.getElementsByTagName("tr");
+
+    for (var i = 1; i < tr.length; i++) {
+        var rowText = tr[i].textContent || tr[i].innerText;
+        if (rowText.toLowerCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+        } else {
+            tr[i].style.display = "none";
+        }
+    }
+}
+</script>
+{% endblock %}

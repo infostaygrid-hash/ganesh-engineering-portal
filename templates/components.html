@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Components Master - Ganesh Engineering{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Form to add new part -->
+    <div class="col-md-4 mb-3">
+        <div class="my-box">
+            <h6 class="border-bottom pb-2 mb-3">Add New Component</h6>
+            <form method="POST" action="{{ url_for('components') }}">
+                <div class="mb-2">
+                    <label class="form-label" style="font-size: 13px;">Part No. / Drawing No.:</label>
+                    <input type="text" name="part_number" class="form-control form-control-sm" placeholder="e.g. GEI-FLG-105" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label" style="font-size: 13px;">Component Name:</label>
+                    <input type="text" name="part_name" class="form-control form-control-sm" placeholder="e.g. Flange Shaft" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label" style="font-size: 13px;">Material Grade:</label>
+                    <input type="text" name="material_grade" class="form-control form-control-sm" placeholder="e.g. EN8D / 20MnCr5" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-size: 13px;">Weight (in Kg):</label>
+                    <input type="number" step="0.01" name="unit_weight_kg" class="form-control form-control-sm" placeholder="e.g. 3.25" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm w-100">Save Component</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Parts table -->
+    <div class="col-md-8">
+        <div class="my-box">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="m-0">Approved Parts Master List</h6>
+                <small class="text-muted">Total: {{ components|length }} parts registered</small>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" style="font-size: 13px;">
+                    <thead>
+                        <tr>
+                            <th width="40">#</th>
+                            <th>Part Number</th>
+                            <th>Component Name</th>
+                            <th>Material Grade</th>
+                            <th>Unit Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comp in components %}
+                        <tr>
+                            <td>{{ comp.id }}</td>
+                            <td><code>{{ comp.part_number }}</code></td>
+                            <td>{{ comp.part_name }}</td>
+                            <td>{{ comp.material_grade }}</td>
+                            <td>{{ comp.unit_weight_kg }} kg</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
